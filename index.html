@@ -173,7 +173,7 @@ function shuffleAndDraw(count, question) {
 
         showResult(selected);
 
-        askOllama(question, selected);
+        askTarot(question, selected);
     }, 1200);
 }
 
@@ -212,6 +212,22 @@ async function askOllama(question, cards) {
 
     const data = await res.json();
     answerBox.innerHTML = data.answer;
+}
+
+async function askTarot(prompt, tarotName) {
+
+  answerBox.innerHTML = "正在向 AI 解牌中…";
+
+  const res = await fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, tarotName })
+  });
+
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "沒有回覆";
+
+  answerBox.innerHTML = text;
 }
 
 </script>
