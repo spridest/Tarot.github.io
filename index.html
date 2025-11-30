@@ -114,30 +114,16 @@
 
 <script>
 // === 你的牌組資料 ===
-const tarot_cards = [
-    { name: "愚者", image: "fool.jpg"},
-    { name: "魔術師", image: "magician.jpg"},
-    { name: "女祭司", image: "high-priestess.jpg"},
-    { name: "女皇", image: "empress.jpg"},
-    { name: "皇帝", image: "emperor.jpg"},
-    { name: "教皇", image: "hierophant.jpg"},
-    { name: "戀人", image: "lovers.jpg"},
-    { name: "戰車", image: "chariot.jpg"},
-    { name: "力量", image: "strength.jpg"},
-    { name: "隱者", image: "hermit.jpg"},
-    { name: "命運之輪", image: "fortune-wheel.jpg"},
-    { name: "正義", image: "justice.jpg"},
-    { name: "倒吊者", image: "hanged-man.jpg"},
-    { name: "死神", image: "death.jpg"},
-    { name: "節制", image: "temperance.jpg"},
-    { name: "惡魔", image: "devil.png"},
-    { name: "塔", image: "tower.jpg"},
-    { name: "星星", image: "stars.jpg"},
-    { name: "月亮", image: "moon.jpg"},
-    { name: "太陽", image: "sun.jpg"},
-    { name: "審判", image: "judgement.jpg"},
-    { name: "世界", image: "world.jpg"},
-];
+let tarot_cards = [];
+
+// 讀取 JSON 檔
+fetch("tarot_cards.json")
+    .then(res => res.json())
+    .then(data => {
+        tarot_cards = data;
+        console.log("Tarot cards loaded:", tarot_cards.length);
+    });
+
 
 let drawCount = 1;
 
