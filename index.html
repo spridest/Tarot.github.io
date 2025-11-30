@@ -160,7 +160,7 @@ function shuffleAndDraw(count, question) {
         showResult(selected);
 
         askTarot(question, selected);
-    }, 1200);
+    }, 30);
 }
 
 function randomCards(n) {
@@ -179,25 +179,6 @@ function showResult(cards) {
         `;
         result.appendChild(div);
     });
-}
-
-// === 送到後端、後端呼叫 OLLAMA ===
-async function askOllama(question, cards) {
-    answerBox.innerHTML = "正在向 AI 解牌中…";
-
-    const cardNames = cards.map(c => c.name).join("、");
-
-    const res = await fetch("http://localhost:5000/ask_tarot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            question: question,
-            cards: cardNames
-        })
-    });
-
-    const data = await res.json();
-    answerBox.innerHTML = data.answer;
 }
 
 async function askTarot(prompt, tarotName) {
