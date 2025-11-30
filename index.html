@@ -102,7 +102,7 @@
 
 <div>
     <button id="one-card">抽 1 張牌</button>
-    <button id="three-card">抽 3 張牌</button>
+    <!-- <button id="three-card">抽 3 張牌</button> -->
 </div>
 
 <div id="deck"></div>
@@ -128,7 +128,7 @@ fetch("tarot_cards.json")
 let drawCount = 1;
 
 document.getElementById("one-card").onclick = () => drawCount = 1;
-document.getElementById("three-card").onclick = () => drawCount = 3;
+<!-- document.getElementById("three-card").onclick = () => drawCount = 3; -->
 
 const deck = document.getElementById("deck");
 const status = document.getElementById("status");
@@ -158,8 +158,8 @@ function shuffleAndDraw(count, question) {
         status.textContent = "抽牌完成！";
 
         showResult(selected);
-
-        askTarot(question, selected);
+        tarotName = selected[0].name
+        askTarot(question, tarotName);
     }, 30);
 }
 
@@ -182,7 +182,7 @@ function showResult(cards) {
 }
 
 async function askTarot(prompt, tarotName) {
-
+  
   answerBox.innerHTML = "正在向 AI 解牌中…";
 
   const res = await fetch("/api/gemini", {
