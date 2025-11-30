@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>塔羅牌抽卡系統</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #222;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+    h1 { margin-bottom: 10px; }
+
+    #deck {
+        width: 150px;
+        height: 250px;
+        margin: 20px auto;
+        background-image: url("images/back.jpg");
+        background-size: cover;
+        border-radius: 10px;
+        box-shadow: 0 0 15px black;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    #deck.shuffle {
+        animation: shuffleAnim 0.5s infinite;
+    }
+
+    @keyframes shuffleAnim {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(3deg); }
+        50% { transform: rotate(-3deg); }
+        100% { transform: rotate(0deg); }
+    }
+
+    .cards-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .tarot-card {
+        width: 150px;
+        text-align: center;
+    }
+
+    .tarot-card img {
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 0 10px black;
+    }
+
+    .name {
+        margin-top: 5px;
+        font-size: 18px;
+    }
+
+    input {
+        width: 300px;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: none;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #one-card { background: #6a5acd; color: white; }
+    #three-card { background: #ff7f50; color: white; }
+
+    #answer-box {
+        margin-top: 30px;
+        padding: 20px;
+        background: #333;
+        border-radius: 10px;
+        width: 70%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+        white-space: pre-wrap;
+    }
+
+</style>
+</head>
+<body>
+
+<h1>塔羅牌抽卡</h1>
+
+<input id="user-question" placeholder="請輸入您的問題…（必填）">
+
+<div>
+    <button id="one-card">抽 1 張牌</button>
+    <button id="three-card">抽 3 張牌</button>
+</div>
+
+<div id="deck"></div>
+<p id="status"></p>
+
+<div id="result" class="cards-container"></div>
+
+<div id="answer-box"></div>
+
+<script>
+// === 你的牌組資料 ===
+const tarot_cards = [
+    { name: "愚者", image: "fool.jpg"},
+    { name: "魔術師", image: "magician.jpg"},
+    { name: "女祭司", image: "high-priestess.jpg"},
+    { name: "女皇", image: "empress.jpg"},
+    { name: "皇帝", image: "emperor.jpg"},
+    { name: "教皇", image: "hierophant.jpg"},
+    { name: "戀人", image: "lovers.jpg"},
+    { name: "戰車", image: "chariot.jpg"},
+    { name: "力量", image: "strength.jpg"},
+    { name: "隱者", image: "hermit.jpg"},
+    { name: "命運之輪", image: "fortune-wheel.jpg"},
+    { name: "正義", image: "justice.jpg"},
+    { name: "倒吊者", image: "hanged-man.jpg"},
+    { name: "死神", image: "death.jpg"},
+    { name: "節制", image: "temperance.jpg"},
+    { name: "惡魔", image: "devil.png"},
+    { name: "塔", image: "tower.jpg"},
+    { name: "星星", image: "stars.jpg"},
+    { name: "月亮", image: "moon.jpg"},
+    { name: "太陽", image: "sun.jpg"},
+    { name: "審判", image: "judgement.jpg"},
+    { name: "世界", image: "world.jpg"},
+];
+
+let drawCount = 1;
+
+document.getElementById("one-card").onclick = () => drawCount = 1;
+document.getElementById("three-card").onclick = () => drawCount = 3;
+
+const deck = document.getElementById("deck");
+const status = document.getElementById("status");
+const result = document.getElementById("result");
+const answerBox = document.getElementById("answer-box");
+
+deck.onclick = () => {
+    const question = document.getElementById("user-question").value.trim();
+
+    if (!question) {
+        alert("⚠ 請先輸入您的問題！");
+        return;
+    }
+    shuffleAndDraw(drawCount, question);
+};
+
+function shuffleAndDraw(count, question) {
+    status.textContent = "洗牌中...";
+    deck.classList.add("shuffle");
+    result.innerHTML = "";
+    answerBox.innerHTML = "";
+
+    setTimeout(() => {
+        deck.classList.remove("shuffle");
+
+        let selected = randomCards(count);
+        status.textContent = "抽牌完成！";
+
+        showResult(selected);
+
+        askOllama(question, selected);
+    }, 1200);
+}
+
+function randomCards(n) {
+    let shuffled = tarot_cards.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, n);
+}
+
+function showResult(cards) {
+    result.innerHTML = "";
+    cards.forEach(c => {
+        let div = document.createElement("div");
+        div.className = "tarot-card";
+        div.innerHTML = `
+            <img src="images/${c.image}">
+            <div class="name">${c.name}</div>
+        `;
+        result.appendChild(div);
+    });
+}
+
+// === 送到後端、後端呼叫 OLLAMA ===
+async function askOllama(question, cards) {
+    answerBox.innerHTML = "正在向 AI 解牌中…";
+
+    const cardNames = cards.map(c => c.name).join("、");
+
+    const res = await fetch("http://localhost:5000/ask_tarot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            question: question,
+            cards: cardNames
+        })
+    });
+
+    const data = await res.json();
+    answerBox.innerHTML = data.answer;
+}
+
+</script>
+
+</body>
+</html>
